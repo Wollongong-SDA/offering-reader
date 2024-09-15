@@ -1,0 +1,7 @@
+services:
+  offering-reader:
+    image: 'ghcr.io/wollongong-sda/offering-reader:latest'
+    container_name: offering-reader
+    restart: always
+    ports:
+      - '3100:3100'
