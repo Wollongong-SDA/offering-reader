@@ -27,13 +27,15 @@ const getLatestOffering = async () => {
   })).data.values[0][0]
 }
 
-const cache = new TTLCache({ttl: 18 * 60 * 60 * 1000})
+const time = 30 * 60 * 1000
+const cache = new TTLCache({ttl: time})
 const app = new Koa()
 
 app.use(koaCash({
-  maxAge: 18 * 60 * 60 * 1000,
+  maxAge: time,
   get: (key) => cache.get(key),
-  set: (key, value) => cache.set(key, value)
+  set: (key, value) => cache.set(key, value),
+  hash: () => 1,
 }))
 
 app.use(async (ctx) => {
@@ -41,22 +43,10 @@ app.use(async (ctx) => {
     ctx.status = 204
     return
   }
-  if (await ctx.cashed()) return;
+  if (ctx.request.query.type !== 'refresh' && await ctx.cashed()) return;
 
   ctx.type = 'application/rss+xml'
-  ctx.body = `<?xml version="1.0" encoding="UTF-8" ?>
-<rss version="2.0">
-<channel>
-  <title>Wollongong Seventh-day Adventist Church</title>
-  <link>https://www.illawarraadventist.org/</link>
-  <description>Wollongong Seventh-day Adventist Church</description>
-  <item>
-    <title>${await getLatestOffering() || "Unknown"}</title>
-    <link>https://www.illawarraadventist.org/</link>
-    <description></description>
-  </item>
-</channel>
-</rss>`
+  ctx.body = `<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0"><channel><title>Wollongong Seventh-day Adventist Church</title><link>https://www.illawarraadventist.org/</link><description>Wollongong Seventh-day Adventist Church</description><item><title>${await getLatestOffering() || "Unknown"}</title><link>https://www.illawarraadventist.org/</link><description></description></item></channel></rss>`
 })
 
-app.listen(3100);
+app.listen(3100, ()=>{console.log('Server running on port 3100 (inside the container)')});
