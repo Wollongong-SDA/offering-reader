@@ -51,7 +51,7 @@ app.use(async (ctx) => {
     return
   }
 
-  ctx.headers['access-control-allow-origin'] = "*"
+  ctx.set('Access-Control-Allow-Origin', '*')
   
   if (ctx.request.query.type !== 'refresh' && await ctx.cashed()) return;
 
