@@ -50,6 +50,9 @@ app.use(async (ctx) => {
     ctx.status = 204
     return
   }
+
+  ctx.headers['access-control-allow-origin'] = "*"
+  
   if (ctx.request.query.type !== 'refresh' && await ctx.cashed()) return;
 
   if (ctx.path == '/api/preacher') {
